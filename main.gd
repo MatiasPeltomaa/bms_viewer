@@ -1,159 +1,233 @@
 extends Node2D
 
-const NOTE_SCENE = preload("res://note.tscn")
+# Preload your note scene
+var NoteScene := preload("res://note.tscn")
 
-var bpm_definitions: Dictionary = {}
-var bpm_events: Array = []
-var notes: Array = []
+# Storage
+var lane7_notes: Array = []
+var lane1_notes: Array = []
+var lane2_notes: Array = []
+var lane3_notes: Array = []
+var lane5_notes: Array = []
+var lane4_notes: Array = []
+var lane6_notes: Array = []
 
-var max_song_time: float = 0.0
-var vertical_scale: float = 1.0 # 1.0 = default spacing
-var start_bpm: float = 120.0
-var song_time: float = 0.0
-var scroll_speed: float = 200.0 # pixels per second
-var playing: bool = false
+# Visual settings
+var lane_width: float = 128   # width per lane
+var lane7_number: int = 7
+var lane1_number: int = 1
+var lane2_number: int = 1
+var lane3_number: int = 1
+var lane4_number: int = 1
+var lane5_number: int = 1
+var lane6_number: int = 1
+
+# Current visible measure
+var current_measure: int = 1
+var total_measures: int = 1
 
 func _ready():
-	get_viewport().files_dropped.connect(on_files_dropped)
+	var file_path = "res://_DoomeyTunes_MARYTHER.bms"
+	parse_bms(file_path)
 
-func _unhandled_input(event):
-	if event is InputEventMouseButton and event.pressed:
-		if Input.is_key_pressed(KEY_CTRL):
-			if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-				vertical_scale /= 1.1
-			elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-				vertical_scale *= 1.1
-		else:
-			var scroll_amount = 0.2
-			if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-				song_time = clamp(song_time - scroll_amount, 0, max_song_time)
-			elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-				song_time = clamp(song_time + scroll_amount, 0, max_song_time)
+	# Determine total measures across both lanes
+	for note in lane7_notes:
+		total_measures = max(total_measures, note.measure)
+	for note in lane1_notes:
+		total_measures = max(total_measures, note.measure)
 
-	if event is InputEventKey:
-		if event.pressed and event.keycode == KEY_SPACE:
-			toggle_pause()
+	# Show the first measure
+	show_measure(current_measure)
 
-func toggle_pause():
-	playing = !playing
-	if playing:
-		print("Resumed")
-	else:
-		print("Paused")
-# --------------------------
-# FILE LOADING
-# --------------------------
-func on_files_dropped(files):
-	var file_path = "".join(files)
-	var file := FileAccess.open(file_path, FileAccess.READ)
-	if file == null:
-		print("Could not open ", file_path)
+func _input(event):
+	if event.is_action_pressed("ui_up"):
+		current_measure = max(current_measure - 1, 1)
+		show_measure(current_measure)
+	elif event.is_action_pressed("ui_down"):
+		current_measure = min(current_measure + 1, total_measures)
+		show_measure(current_measure)
+
+func parse_bms(path: String) -> void:
+	var file := FileAccess.open(path, FileAccess.READ)
+	if not file:
+		push_error("Could not open file: %s" % path)
 		return
-	
-	parse_bms(file.get_as_text())
-	start_song()
 
-# --------------------------
-# PARSER
-# --------------------------
-func parse_bms(text: String):
-	for line in text.split("\n"):
-		line = line.strip_edges()
-		if line == "" or not line.begins_with("#"):
+	file.seek(0)
+	while not file.eof_reached():
+		var line = file.get_line().strip_edges()
+		if not line.begins_with("#") or line.length() <= 7:
 			continue
 
-		# BPM definitions
-		if line.begins_with("#BPM") and line.length() > 6 and line[4].is_valid_int() == false:
-			var bpm_id = line.substr(4, 2)
-			var bpm_val = float(line.split(" ")[1])
-			bpm_definitions[bpm_id] = bpm_val
+		var measure_num = int(line.substr(1, 3))
+		if measure_num == 0:
 			continue
 
-		# Measure/channel/data
-		if line.length() < 7:
-			continue
+		var channel = line.substr(4, 2)
+		var data = line.substr(7)
 
-		var measure = int(line.substr(1, 3))
-		var channel = int(line.substr(4, 2))
-		var data = line.substr(7, line.length()).strip_edges()
-		var total_pairs = data.length() / 2  # each 2 chars = 1 tick
+		# --- Lane 7 ---
+		if channel == "19":
+			var divisions = data.length() / 2
+			for i in range(divisions):
+				var pair = data.substr(i * 2, 2)
+				if pair != "00":
+					lane7_notes.append({
+						"measure": measure_num,
+						"slot": i + 1,
+						"total_slots": divisions
+					})
 
-		for i in range(total_pairs):
-			var pair = data.substr(i*2, 2)
-			if pair == "00":
-				continue  # no note
+		# --- Lane 1 ---
+		if channel == "11":
+			var divisions = data.length() / 2
+			for i in range(divisions):
+				var pair = data.substr(i * 2, 2)
+				if pair != "00":
+					lane1_notes.append({
+						"measure": measure_num,
+						"slot": i + 1,
+						"total_slots": divisions
+					})
 
-			var fraction = float(i) / total_pairs
+		if channel == "12":
+			var divisions = data.length() / 2
+			for i in range(divisions):
+				var pair = data.substr(i * 2, 2)
+				if pair != "00":
+					lane2_notes.append({
+						"measure": measure_num,
+						"slot": i + 1,
+						"total_slots": divisions
+					})
 
-			# Map channels to lanes
-			match channel:
-				11: add_note(measure, fraction, 1)
-				12: add_note(measure, fraction, 2)
-				13: add_note(measure, fraction, 3)
-				14: add_note(measure, fraction, 4)
-				15: add_note(measure, fraction, 5)
-				18: add_note(measure, fraction, 6)
-				19: add_note(measure, fraction, 7)
-				16: add_note(measure, fraction, 0)
+		if channel == "13":
+			var divisions = data.length() / 2
+			for i in range(divisions):
+				var pair = data.substr(i * 2, 2)
+				if pair != "00":
+					lane3_notes.append({
+						"measure": measure_num,
+						"slot": i + 1,
+						"total_slots": divisions
+					})
 
-				# BPM changes
-				2:
-					var bpm_val = int("0x" + pair)
-					bpm_events.append({"measure": measure, "fraction": fraction, "bpm": bpm_val})
-				3:
-					if bpm_definitions.has(pair):
-						var bpm_val2 = bpm_definitions[pair]
-						bpm_events.append({"measure": measure, "fraction": fraction, "bpm": bpm_val2})
+		if channel == "14":
+			var divisions = data.length() / 2
+			for i in range(divisions):
+				var pair = data.substr(i * 2, 2)
+				if pair != "00":
+					lane4_notes.append({
+						"measure": measure_num,
+						"slot": i + 1,
+						"total_slots": divisions
+					})
 
+		if channel == "15":
+			var divisions = data.length() / 2
+			for i in range(divisions):
+				var pair = data.substr(i * 2, 2)
+				if pair != "00":
+					lane5_notes.append({
+						"measure": measure_num,
+						"slot": i + 1,
+						"total_slots": divisions
+					})
 
-# --------------------------
-# DATA HELPERS
-# --------------------------
-func add_note(measure: int, fraction: float, lane: int):
-	notes.append({ "measure": measure, "fraction": fraction, "lane": lane })
+		if channel == "18":
+			var divisions = data.length() / 2
+			for i in range(divisions):
+				var pair = data.substr(i * 2, 2)
+				if pair != "00":
+					lane6_notes.append({
+						"measure": measure_num,
+						"slot": i + 1,
+						"total_slots": divisions
+					})
 
-func measure_to_time(measure: int, fraction: float) -> float:
-	var time = 0.0
-	var bpm = start_bpm
-	var beat_len = 60.0 / bpm
-	
-	# Walk measures
-	for m in range(measure):
-		time += 4.0 * beat_len
-	
-	# BPM events in same measure
-	for e in bpm_events:
-		if e.measure == measure and e.fraction <= fraction:
-			bpm = e.bpm
-			beat_len = 60.0 / bpm
-	
-	time += 4.0 * beat_len * fraction
-	return time
+func show_measure(measure_index: int) -> void:
+	# Clear current notes
+	for child in get_children():
+		child.queue_free()
 
-# --------------------------
-# GAME LOOP
-# --------------------------
-func start_song():
-	playing = true
-	song_time = 0.0
-	max_song_time = 0.0  # reset
+	var viewport_height = get_viewport_rect().size.y
 
-	for note_data in notes:
-		# Calculate time and store in dictionary key
-		note_data["time"] = measure_to_time(note_data["measure"], note_data["fraction"])
-		spawn_note(note_data)
-		
-		# Keep track of the latest note time
-		max_song_time = max(max_song_time, note_data["time"])
+	# --- Lane 7 ---
+	var lane7_x = 512
+	var notes_to_show7 = lane7_notes.filter(func(n): return n.measure == measure_index)
+	for note_data in notes_to_show7:
+		var note_instance = NoteScene.instantiate()
+		if note_instance.has_method("set_note_data"):
+			note_instance.set_note_data(note_data.measure, note_data.slot, note_data.total_slots)
 
-func spawn_note(note_data):
-	var n = NOTE_SCENE.instantiate()
-	n.lane = note_data["lane"]
-	n.time = note_data["time"]
-	n.playfield = self
-	add_child(n)
+		var y = viewport_height - ((note_data.slot - 0.5) / note_data.total_slots) * viewport_height
+		note_instance.position = Vector2(lane7_x, y)
+		add_child(note_instance)
 
-func _process(delta):
-	if not playing:
-		return
-	song_time += delta
+	# --- Lane 1 ---
+	var lane1_x = 128
+	var notes_to_show1 = lane1_notes.filter(func(n): return n.measure == measure_index)
+	for note_data in notes_to_show1:
+		var note_instance = NoteScene.instantiate()
+		if note_instance.has_method("set_note_data"):
+			note_instance.set_note_data(note_data.measure, note_data.slot, note_data.total_slots)
+
+		var y = viewport_height - ((note_data.slot - 0.5) / note_data.total_slots) * viewport_height
+		note_instance.position = Vector2(lane1_x, y)
+		add_child(note_instance)
+
+	var lane2_x = 192
+	var notes_to_show2 = lane2_notes.filter(func(n): return n.measure == measure_index)
+	for note_data in notes_to_show2:
+		print("Lane 2 - Measure %d, Slot %d/%d" % [note_data.measure, note_data.slot, note_data.total_slots])
+		var note_instance = NoteScene.instantiate()
+		if note_instance.has_method("set_note_data"):
+			note_instance.set_note_data(note_data.measure, note_data.slot, note_data.total_slots)
+
+		var y = viewport_height - ((note_data.slot - 0.5) / note_data.total_slots) * viewport_height
+		note_instance.position = Vector2(lane2_x, y)
+		add_child(note_instance)
+
+	var lane3_x = 256
+	var notes_to_show3 = lane3_notes.filter(func(n): return n.measure == measure_index)
+	for note_data in notes_to_show3:
+		var note_instance = NoteScene.instantiate()
+		if note_instance.has_method("set_note_data"):
+			note_instance.set_note_data(note_data.measure, note_data.slot, note_data.total_slots)
+
+		var y = viewport_height - ((note_data.slot - 0.5) / note_data.total_slots) * viewport_height
+		note_instance.position = Vector2(lane3_x, y)
+		add_child(note_instance)
+
+	var lane4_x = 320
+	var notes_to_show4 = lane4_notes.filter(func(n): return n.measure == measure_index)
+	for note_data in notes_to_show4:
+		var note_instance = NoteScene.instantiate()
+		if note_instance.has_method("set_note_data"):
+			note_instance.set_note_data(note_data.measure, note_data.slot, note_data.total_slots)
+
+		var y = viewport_height - ((note_data.slot - 0.5) / note_data.total_slots) * viewport_height
+		note_instance.position = Vector2(lane4_x, y)
+		add_child(note_instance)
+
+	var lane5_x = 384
+	var notes_to_show5 = lane5_notes.filter(func(n): return n.measure == measure_index)
+	for note_data in notes_to_show5:
+		var note_instance = NoteScene.instantiate()
+		if note_instance.has_method("set_note_data"):
+			note_instance.set_note_data(note_data.measure, note_data.slot, note_data.total_slots)
+
+		var y = viewport_height - ((note_data.slot - 0.5) / note_data.total_slots) * viewport_height
+		note_instance.position = Vector2(lane5_x, y)
+		add_child(note_instance)
+
+	var lane6_x = 448
+	var notes_to_show6 = lane6_notes.filter(func(n): return n.measure == measure_index)
+	for note_data in notes_to_show6:
+		var note_instance = NoteScene.instantiate()
+		if note_instance.has_method("set_note_data"):
+			note_instance.set_note_data(note_data.measure, note_data.slot, note_data.total_slots)
+
+		var y = viewport_height - ((note_data.slot - 0.5) / note_data.total_slots) * viewport_height
+		note_instance.position = Vector2(lane6_x, y)
+		add_child(note_instance)
