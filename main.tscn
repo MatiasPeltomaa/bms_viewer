@@ -3,46 +3,4 @@
 [ext_resource type="Script" uid="uid://30dxv354u8w7" path="res://main.gd" id="1_ig7tw"]
 
 [node name="main" type="Node2D"]
-
-[node name="playfield" type="Node2D" parent="."]
 script = ExtResource("1_ig7tw")
-
-[node name="divider_1" type="ColorRect" parent="playfield"]
-offset_left = 128.0
-offset_right = 130.0
-offset_bottom = 864.0
-
-[node name="divider_2" type="ColorRect" parent="playfield"]
-offset_left = 256.0
-offset_right = 258.0
-offset_bottom = 864.0
-
-[node name="divider_3" type="ColorRect" parent="playfield"]
-offset_left = 384.0
-offset_right = 386.0
-offset_bottom = 864.0
-
-[node name="divider_4" type="ColorRect" parent="playfield"]
-offset_left = 512.0
-offset_right = 514.0
-offset_bottom = 864.0
-
-[node name="divider_5" type="ColorRect" parent="playfield"]
-offset_left = 640.0
-offset_right = 642.0
-offset_bottom = 864.0
-
-[node name="divider_6" type="ColorRect" parent="playfield"]
-offset_left = 768.0
-offset_right = 770.0
-offset_bottom = 864.0
-
-[node name="divider_7" type="ColorRect" parent="playfield"]
-offset_left = 896.0
-offset_right = 898.0
-offset_bottom = 864.0
-
-[node name="divider_8" type="ColorRect" parent="playfield"]
-offset_left = 1024.0
-offset_right = 1026.0
-offset_bottom = 864.0
