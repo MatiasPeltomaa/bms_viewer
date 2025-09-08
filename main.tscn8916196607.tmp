@@ -16,44 +16,44 @@ texture = ExtResource("2_0xm2m")
 [node name="lane_divider_right" type="ColorRect" parent="ui"]
 offset_right = 2.0
 offset_bottom = 1080.0
-color = Color(0.68235296, 0.68235296, 0.68235296, 1)
+color = Color(0.735357, 0.735357, 0.735357, 1)
 
 [node name="lane_divider_left" type="ColorRect" parent="ui"]
 offset_right = 2.0
 offset_bottom = 1080.0
-color = Color(0.68235296, 0.68235296, 0.68235296, 1)
+color = Color(0.735357, 0.735357, 0.735357, 1)
 
 [node name="lane_divider_1" type="ColorRect" parent="ui"]
 offset_right = 2.0
 offset_bottom = 1080.0
-color = Color(0.68235296, 0.68235296, 0.68235296, 1)
+color = Color(0.735357, 0.735357, 0.735357, 1)
 
 [node name="lane_divider_2" type="ColorRect" parent="ui"]
 offset_right = 2.0
 offset_bottom = 1080.0
-color = Color(0.68235296, 0.68235296, 0.68235296, 1)
+color = Color(0.735357, 0.735357, 0.735357, 1)
 
 [node name="lane_divider_3" type="ColorRect" parent="ui"]
 offset_right = 2.0
 offset_bottom = 1080.0
-color = Color(0.68235296, 0.68235296, 0.68235296, 1)
+color = Color(0.735357, 0.735357, 0.735357, 1)
 
 [node name="lane_divider_4" type="ColorRect" parent="ui"]
 offset_right = 2.0
 offset_bottom = 1080.0
-color = Color(0.68235296, 0.68235296, 0.68235296, 1)
+color = Color(0.735357, 0.735357, 0.735357, 1)
 
 [node name="lane_divider_5" type="ColorRect" parent="ui"]
 offset_right = 2.0
 offset_bottom = 1080.0
-color = Color(0.68235296, 0.68235296, 0.68235296, 1)
+color = Color(0.735357, 0.735357, 0.735357, 1)
 
 [node name="lane_divider_6" type="ColorRect" parent="ui"]
 offset_right = 2.0
 offset_bottom = 1080.0
-color = Color(0.68235296, 0.68235296, 0.68235296, 1)
+color = Color(0.735357, 0.735357, 0.735357, 1)
 
 [node name="lane_divider_7" type="ColorRect" parent="ui"]
 offset_right = 2.0
 offset_bottom = 1080.0
-color = Color(0.68235296, 0.68235296, 0.68235296, 1)
+color = Color(0.735357, 0.735357, 0.735357, 1)

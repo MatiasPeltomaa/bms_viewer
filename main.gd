@@ -2,6 +2,9 @@ extends Node2D
 
 var note_scene := preload("res://note.tscn")
 
+var scroll_offset: float = 0.0
+var scroll_speed: float = 200.0
+
 var scratch_notes: Array = []
 var lane1_notes: Array = []
 var lane2_notes: Array = []
@@ -12,22 +15,32 @@ var lane6_notes: Array = []
 var lane7_notes: Array = []
 
 var lane_colors := [
-	Color(1, 0, 0),
-	Color(1, 1, 1),
-	Color(0, 0, 1),
-	Color(1, 1, 1),
-	Color(0, 0, 1),
-	Color(1, 1, 1),
-	Color(0, 0, 1),
-	Color(1, 1, 1)
+	Color(0.485, 0.007, 0.003),   # scratch
+	Color(0.93, 0.93, 0.93),   # lane1
+	Color(0, 0.093, 0.701),   # lane2
+	Color(0.93, 0.93, 0.93),   # lane3
+	Color(0, 0.093, 0.701),   # lane4
+	Color(0.93, 0.93, 0.93),   # lane5
+	Color(0, 0.093, 0.701),   # lane6
+	Color(0.93, 0.93, 0.93)    # lane7
 ]
 
-var lane_positions := [64, 128, 192, 256, 320, 384, 448, 512]
-
-var current_measure: int = 1
 var total_measures: int = 1
+var lane_positions: Array = []
 
 func _ready():
+	var window_width := get_viewport_rect().size.x
+	var lane_spacing := 64
+	var main_lane_count := 7
+	var playfield_width := (main_lane_count - 1) * lane_spacing
+	var start_x := (window_width - playfield_width) / 2
+
+	lane_positions.append(start_x - lane_spacing)
+	for i in range(main_lane_count):
+		lane_positions.append(start_x + i * lane_spacing)
+
+	print("Lane positions: ", lane_positions)
+
 	var file_path = "res://_DoomeyTunes_MARYTHER.bms"
 	parse_bms(file_path)
 
@@ -35,15 +48,34 @@ func _ready():
 		for note in lane:
 			total_measures = max(total_measures, note.measure)
 
-	show_measure(current_measure)
+	spawn_all_notes()
+	draw_measure_lines()
+
+	var viewport_height = get_viewport_rect().size.y
+	scroll_offset = (total_measures - 1) * viewport_height  # start fully at bottom
 
 func _input(event):
-	if event.is_action_pressed("ui_up"):
-		current_measure = max(current_measure - 1, 1)
-		show_measure(current_measure)
-	elif event.is_action_pressed("ui_down"):
-		current_measure = min(current_measure + 1, total_measures)
-		show_measure(current_measure)
+	if event is InputEventMouseButton and event.pressed:
+		var viewport_height = get_viewport_rect().size.y
+		var measure_height = viewport_height
+		var max_scroll = max(0, total_measures * measure_height - viewport_height)
+
+		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			scroll_offset = max(scroll_offset - scroll_speed, 0)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			scroll_offset = min(scroll_offset + scroll_speed, max_scroll)
+
+func _process(_delta):
+	position.y = -scroll_offset
+	$ui/lane_divider_right.position.x = lane_positions[7] + 32
+	$ui/lane_divider_left.position.x = lane_positions[1] - 32
+	$ui/lane_divider_1.position.x = lane_positions[1] + 32
+	$ui/lane_divider_2.position.x = lane_positions[2] + 32
+	$ui/lane_divider_3.position.x = lane_positions[3] + 32
+	$ui/lane_divider_4.position.x = lane_positions[4] + 32
+	$ui/lane_divider_5.position.x = lane_positions[5] + 32
+	$ui/lane_divider_6.position.x = lane_positions[6] + 32
+	$ui/lane_divider_7.position.x = lane_positions[0] - 32
 
 func parse_bms(path: String) -> void:
 	var file := FileAccess.open(path, FileAccess.READ)
@@ -58,8 +90,8 @@ func parse_bms(path: String) -> void:
 			continue
 
 		var measure_num = int(line.substr(1, 3))
-		if measure_num == 0:
-			continue
+		#if measure_num == 0:
+			#continue
 
 		var channel = line.substr(4, 2)
 		var data = line.substr(7)
@@ -82,34 +114,53 @@ func parse_bms(path: String) -> void:
 				var pair = data.substr(i * 2, 2)
 				if pair != "00":
 					var frac: float = float(i) / float(divisions)
-					print("Lane %s - Measure %d, Slot %d/%d, fraction: %.3f" % [channel, measure_num, i + 1, divisions, frac])
 					lane_array.append({
 						"measure": measure_num,
 						"slot": i + 1,
 						"total_slots": divisions,
 						"frac": frac
 					})
+					
+		total_measures = max(total_measures, measure_num + 1)
 
-func show_measure(measure_index: int) -> void:
-	for child in get_children():
-		child.queue_free()
-
+func spawn_all_notes() -> void:
 	var viewport_height = get_viewport_rect().size.y
+	var measure_height = viewport_height
 
 	var lanes = [scratch_notes, lane1_notes, lane2_notes, lane3_notes, lane4_notes, lane5_notes, lane6_notes, lane7_notes]
 
 	for lane_index in range(lanes.size()):
 		var lane_array = lanes[lane_index]
 		var x_pos = lane_positions[lane_index]
-		var notes_to_show = lane_array.filter(func(n): return n.measure == measure_index)
 
-		for note_data in notes_to_show:
+		for note_data in lane_array:
 			var frac = note_data.frac
-			var y = viewport_height - (frac * viewport_height)
+			var y = (total_measures - note_data.measure) * measure_height + (1.0 - frac) * measure_height
+
 			var note_instance = note_scene.instantiate()
 			if note_instance.has_method("set_note_data"):
 				note_instance.set_note_data(note_data.measure, note_data.slot, note_data.total_slots)
+
 			note_instance.position = Vector2(x_pos, y)
+
 			if note_instance is CanvasItem:
 				note_instance.modulate = lane_colors[lane_index]
+
 			add_child(note_instance)
+
+func draw_measure_lines():
+	var viewport_height = get_viewport_rect().size.y
+	var measure_height = viewport_height
+
+	var playfield_left = lane_positions[0] - 32
+	var playfield_right = lane_positions[7] + 32
+	var playfield_width = playfield_right - playfield_left
+
+	for m in range(total_measures + 1):
+		var y = (total_measures - m) * measure_height
+
+		var line = ColorRect.new()
+		line.color = Color(0.423, 0.423, 0.423)
+		line.position = Vector2(playfield_left, y)
+		line.size = Vector2(playfield_width, 4)
+		add_child(line)
