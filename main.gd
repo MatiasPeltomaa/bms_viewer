@@ -2,6 +2,7 @@ extends Node2D
 
 var note_scene := preload("res://note.tscn")
 
+var scratch_notes: Array = []
 var lane1_notes: Array = []
 var lane2_notes: Array = []
 var lane3_notes: Array = []
@@ -10,7 +11,18 @@ var lane5_notes: Array = []
 var lane6_notes: Array = []
 var lane7_notes: Array = []
 
-var lane_positions := [128, 192, 256, 320, 384, 448, 512]
+var lane_colors := [
+	Color(1, 0, 0),
+	Color(1, 1, 1),
+	Color(0, 0, 1),
+	Color(1, 1, 1),
+	Color(0, 0, 1),
+	Color(1, 1, 1),
+	Color(0, 0, 1),
+	Color(1, 1, 1)
+]
+
+var lane_positions := [64, 128, 192, 256, 320, 384, 448, 512]
 
 var current_measure: int = 1
 var total_measures: int = 1
@@ -19,7 +31,7 @@ func _ready():
 	var file_path = "res://_DoomeyTunes_MARYTHER.bms"
 	parse_bms(file_path)
 
-	for lane in [lane1_notes, lane2_notes, lane3_notes, lane4_notes, lane5_notes, lane6_notes, lane7_notes]:
+	for lane in [scratch_notes, lane1_notes, lane2_notes, lane3_notes, lane4_notes, lane5_notes, lane6_notes, lane7_notes]:
 		for note in lane:
 			total_measures = max(total_measures, note.measure)
 
@@ -53,6 +65,7 @@ func parse_bms(path: String) -> void:
 		var data = line.substr(7)
 
 		var lane_map = {
+			"16": scratch_notes,
 			"11": lane1_notes,
 			"12": lane2_notes,
 			"13": lane3_notes,
@@ -82,10 +95,8 @@ func show_measure(measure_index: int) -> void:
 		child.queue_free()
 
 	var viewport_height = get_viewport_rect().size.y
-	var padding_top = 10
-	var padding_bottom = 10
 
-	var lanes = [lane1_notes, lane2_notes, lane3_notes, lane4_notes, lane5_notes, lane6_notes, lane7_notes]
+	var lanes = [scratch_notes, lane1_notes, lane2_notes, lane3_notes, lane4_notes, lane5_notes, lane6_notes, lane7_notes]
 
 	for lane_index in range(lanes.size()):
 		var lane_array = lanes[lane_index]
@@ -94,9 +105,11 @@ func show_measure(measure_index: int) -> void:
 
 		for note_data in notes_to_show:
 			var frac = note_data.frac
-			var y = viewport_height - (padding_bottom + frac * (viewport_height - padding_top - padding_bottom))
+			var y = viewport_height - (frac * viewport_height)
 			var note_instance = note_scene.instantiate()
 			if note_instance.has_method("set_note_data"):
 				note_instance.set_note_data(note_data.measure, note_data.slot, note_data.total_slots)
 			note_instance.position = Vector2(x_pos, y)
+			if note_instance is CanvasItem:
+				note_instance.modulate = lane_colors[lane_index]
 			add_child(note_instance)
