@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="bms_viewer"
+run/main_scene="uid://3qlf2va1hnxn"
 config/features=PackedStringArray("4.5", "GL Compatibility")
 boot_splash/show_image=false
 boot_splash/fullsize=false
