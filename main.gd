@@ -41,8 +41,6 @@ func _ready():
 	for i in range(main_lane_count):
 		lane_positions.append(start_x + i * lane_spacing)
 
-	print("Lane positions: ", lane_positions)
-
 func _input(event):
 	if event is InputEventMouseButton and event.pressed:
 		var viewport_height = get_viewport_rect().size.y

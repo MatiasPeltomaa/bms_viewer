@@ -57,3 +57,7 @@ color = Color(0.7373294, 0.7373294, 0.7373294, 0.25)
 offset_right = 2.0
 offset_bottom = 1080.0
 color = Color(0.7373294, 0.7373294, 0.7373294, 0.25)
+
+[node name="song_info" type="RichTextLabel" parent="ui"]
+offset_right = 40.0
+offset_bottom = 40.0
