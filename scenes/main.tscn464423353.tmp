@@ -1,63 +1,93 @@
-[gd_scene load_steps=3 format=3 uid="uid://3qlf2va1hnxn"]
+[gd_scene load_steps=5 format=3 uid="uid://3qlf2va1hnxn"]
 
-[ext_resource type="Script" uid="uid://30dxv354u8w7" path="res://main.gd" id="1_ig7tw"]
-[ext_resource type="Texture2D" uid="uid://5oirnyia6tmw" path="res://background.png" id="2_0xm2m"]
+[ext_resource type="Script" uid="uid://30dxv354u8w7" path="res://scripts/main.gd" id="1_sugp2"]
+[ext_resource type="Texture2D" uid="uid://5oirnyia6tmw" path="res://assets/background.png" id="2_jyhfs"]
+[ext_resource type="FontFile" uid="uid://bxjbmckxf1i0q" path="res://assets/angsab.ttf" id="3_tbgi4"]
+
+[sub_resource type="Theme" id="Theme_tefeu"]
+default_font = ExtResource("3_tbgi4")
 
 [node name="main" type="Node2D"]
-script = ExtResource("1_ig7tw")
+script = ExtResource("1_sugp2")
 
 [node name="ui" type="CanvasLayer" parent="."]
 layer = -1
 
 [node name="background" type="Sprite2D" parent="ui"]
 position = Vector2(960, 540)
-texture = ExtResource("2_0xm2m")
+texture = ExtResource("2_jyhfs")
 
 [node name="lane_divider_right" type="ColorRect" parent="ui"]
+visible = false
 offset_right = 2.0
 offset_bottom = 1080.0
 color = Color(0.7373294, 0.735357, 0.735357, 1)
 
 [node name="lane_divider_left" type="ColorRect" parent="ui"]
+visible = false
 offset_right = 2.0
 offset_bottom = 1080.0
 color = Color(0.7373294, 0.735357, 0.735357, 1)
 
 [node name="lane_divider_1" type="ColorRect" parent="ui"]
+visible = false
 offset_right = 2.0
 offset_bottom = 1080.0
 color = Color(0.7373294, 0.7373294, 0.7373294, 0.25)
 
 [node name="lane_divider_2" type="ColorRect" parent="ui"]
+visible = false
 offset_right = 2.0
 offset_bottom = 1080.0
 color = Color(0.7373294, 0.7373294, 0.7373294, 0.25)
 
 [node name="lane_divider_3" type="ColorRect" parent="ui"]
+visible = false
 offset_right = 2.0
 offset_bottom = 1080.0
 color = Color(0.7373294, 0.7373294, 0.7373294, 0.25)
 
 [node name="lane_divider_4" type="ColorRect" parent="ui"]
+visible = false
 offset_right = 2.0
 offset_bottom = 1080.0
 color = Color(0.7373294, 0.7373294, 0.7373294, 0.25)
 
 [node name="lane_divider_5" type="ColorRect" parent="ui"]
+visible = false
 offset_right = 2.0
 offset_bottom = 1080.0
 color = Color(0.7373294, 0.7373294, 0.7373294, 0.25)
 
 [node name="lane_divider_6" type="ColorRect" parent="ui"]
+visible = false
 offset_right = 2.0
 offset_bottom = 1080.0
 color = Color(0.7373294, 0.7373294, 0.7373294, 0.25)
 
 [node name="lane_divider_7" type="ColorRect" parent="ui"]
+visible = false
 offset_right = 2.0
 offset_bottom = 1080.0
 color = Color(0.7373294, 0.7373294, 0.7373294, 0.25)
 
 [node name="song_info" type="RichTextLabel" parent="ui"]
+visible = false
 offset_right = 40.0
 offset_bottom = 40.0
+
+[node name="prompt" type="RichTextLabel" parent="ui"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_tefeu")
+text = "Moro"
+horizontal_alignment = 1

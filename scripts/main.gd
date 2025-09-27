@@ -1,6 +1,6 @@
 extends Node2D
 
-var note_scene := preload("res://note.tscn")
+var note_scene := preload("res://scenes/note.tscn")
 
 var scroll_offset: float = 0.0
 var scroll_speed: float = 100.0
@@ -55,15 +55,15 @@ func _input(event):
 func _process(_delta):
 	position.y = -scroll_offset
 	if $ui:
-		$ui/lane_divider_left.position.x = lane_positions[0] - 64
-		$ui/lane_divider_7.position.x = lane_positions[1] - 32
-		$ui/lane_divider_1.position.x = lane_positions[1] + 32
-		$ui/lane_divider_2.position.x = lane_positions[2] + 32
-		$ui/lane_divider_3.position.x = lane_positions[3] + 32
-		$ui/lane_divider_4.position.x = lane_positions[4] + 32
-		$ui/lane_divider_5.position.x = lane_positions[5] + 32
-		$ui/lane_divider_6.position.x = lane_positions[6] + 32
-		$ui/lane_divider_right.position.x = lane_positions[7] + 32
+		$ui/dividers/lane_divider_left.position.x = lane_positions[0] - 64
+		$ui/dividers/lane_divider_7.position.x = lane_positions[1] - 32
+		$ui/dividers/lane_divider_1.position.x = lane_positions[1] + 32
+		$ui/dividers/lane_divider_2.position.x = lane_positions[2] + 32
+		$ui/dividers/lane_divider_3.position.x = lane_positions[3] + 32
+		$ui/dividers/lane_divider_4.position.x = lane_positions[4] + 32
+		$ui/dividers/lane_divider_5.position.x = lane_positions[5] + 32
+		$ui/dividers/lane_divider_6.position.x = lane_positions[6] + 32
+		$ui/dividers/lane_divider_right.position.x = lane_positions[7] + 32
 
 func parse_bms(path: String) -> void:
 	var file := FileAccess.open(path, FileAccess.READ)
@@ -180,6 +180,10 @@ func _on_files_dropped(files: PackedStringArray) -> void:
 		parse_bms(file_path)
 		spawn_all_notes()
 		draw_measure_lines()
+
+		$ui/dividers.visible = true
+		$ui/prompt.visible = false
+		$ui/song_info.visible = true
 
 		var viewport_height = get_viewport_rect().size.y
 		scroll_offset = (total_measures - 1) * viewport_height

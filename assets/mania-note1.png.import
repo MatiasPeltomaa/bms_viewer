@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c4e8bxeahh7ip"
-path="res://.godot/imported/mania-note1.png-4ee57868cde011396e4fc34a796ea33a.ctex"
+path="res://.godot/imported/mania-note1.png-4497546417406087aae795ab3f020a92.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://mania-note1.png"
-dest_files=["res://.godot/imported/mania-note1.png-4ee57868cde011396e4fc34a796ea33a.ctex"]
+source_file="res://assets/mania-note1.png"
+dest_files=["res://.godot/imported/mania-note1.png-4497546417406087aae795ab3f020a92.ctex"]
 
 [params]
 
